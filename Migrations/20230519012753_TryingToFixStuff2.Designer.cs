@@ -12,8 +12,8 @@ using TamagotchiAPI.Models;
 namespace TamagotchiAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230518015623_FixedOrder")]
-    partial class FixedOrder
+    [Migration("20230519012753_TryingToFixStuff2")]
+    partial class TryingToFixStuff2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -84,6 +84,8 @@ namespace TamagotchiAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PetId");
+
                     b.ToTable("Playtimes");
                 });
 
@@ -104,6 +106,17 @@ namespace TamagotchiAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Scoldings");
+                });
+
+            modelBuilder.Entity("TamagotchiAPI.Models.Playtime", b =>
+                {
+                    b.HasOne("TamagotchiAPI.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pet");
                 });
 #pragma warning restore 612, 618
         }

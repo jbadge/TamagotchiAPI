@@ -6,24 +6,22 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace TamagotchiAPI.Migrations
 {
-    public partial class AddPetPlaytimeFeedingScolding : Migration
+    public partial class TryingToFixStuff2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Pets",
+                name: "Feedings",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Birthday = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    HungerLevel = table.Column<int>(type: "integer", nullable: false),
-                    HappinessLevel = table.Column<int>(type: "integer", nullable: false)
+                    When = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PetId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Pets", x => x.Id);
+                    table.PrimaryKey("PK_Feedings", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -38,20 +36,12 @@ namespace TamagotchiAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Playtimes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Feedings",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    When = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    PetId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Feedings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Playtimes_Pets_PetId",
+                        column: x => x.PetId,
+                        principalTable: "Pets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -68,15 +58,16 @@ namespace TamagotchiAPI.Migrations
                     table.PrimaryKey("PK_Scoldings", x => x.Id);
                 });
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Playtimes_PetId",
+                table: "Playtimes",
+                column: "PetId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Feedings");
-
-            migrationBuilder.DropTable(
-                name: "Pets");
 
             migrationBuilder.DropTable(
                 name: "Playtimes");

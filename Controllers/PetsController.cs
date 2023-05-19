@@ -9,24 +9,24 @@ using TamagotchiAPI.Models;
 
 namespace TamagotchiAPI.Controllers
 {
-    // All of these routes will be at the base URL:     /api/Pet
+    // All of these routes will be at the base URL:     /api/Pets
     // That is what "api/[controller]" means below. It uses the name of the controller
-    // in this case PetController to determine the URL
+    // in this case PetsController to determine the URL
     [Route("api/[controller]")]
     [ApiController]
-    public class PetController : ControllerBase
+    public class PetsController : ControllerBase
     {
         // This is the variable you use to have access to your database
         private readonly DatabaseContext _context;
 
         // Constructor that receives a reference to your database context
         // and stores it in _context for you to use in your API methods
-        public PetController(DatabaseContext context)
+        public PetsController(DatabaseContext context)
         {
             _context = context;
         }
 
-        // GET: api/Pet
+        // GET: api/Pets
         //
         // Returns a list of all your Pets
         //
@@ -38,7 +38,7 @@ namespace TamagotchiAPI.Controllers
             return await _context.Pets.OrderBy(row => row.Id).ToListAsync();
         }
 
-        // GET: api/Pet/5
+        // GET: api/Pets/5
         //
         // Fetches and returns a specific pet by finding it by id. The id is specified in the
         // URL. In the sample URL above it is the `5`.  The "{id}" in the [HttpGet("{id}")] is what tells dotnet
@@ -61,7 +61,7 @@ namespace TamagotchiAPI.Controllers
             return pet;
         }
 
-        // PUT: api/Pet/5
+        // PUT: api/Pets/5
         //
         // Update an individual pet with the requested id. The id is specified in the URL
         // In the sample URL above it is the `5`. The "{id} in the [HttpPut("{id}")] is what tells dotnet
@@ -112,7 +112,7 @@ namespace TamagotchiAPI.Controllers
             return Ok(pet);
         }
 
-        // POST: api/Pet
+        // POST: api/Pets
         //
         // Creates a new pet in the database.
         //
@@ -133,7 +133,7 @@ namespace TamagotchiAPI.Controllers
             return CreatedAtAction("GetPet", new { id = pet.Id }, pet);
         }
 
-        // DELETE: api/Pet/5
+        // DELETE: api/Pets/5
         //
         // Deletes an individual pet with the requested id. The id is specified in the URL
         // In the sample URL above it is the `5`. The "{id} in the [HttpDelete("{id}")] is what tells dotnet
@@ -158,6 +158,73 @@ namespace TamagotchiAPI.Controllers
 
             // Return a copy of the deleted data
             return Ok(pet);
+        }
+
+        // Add playtimes to a pet
+        // POST: /api/Pets/5/Playtimes
+        [HttpPost("{id}/Playtimes")]
+        public async Task<ActionResult<Playtime>> CreatePlaytimesForPet(int id, Playtime playtime)
+        {
+            // First, lets find the pet (by using the ID)
+            var pet = await _context.Pets.FindAsync(id);
+
+            // If the pet doesn't exist: return a 404 Not Found.
+            if (pet == null)
+            {
+                // Return a '404' response to the client indicating we could not find a pet with this id
+                return NotFound();
+            }
+
+            // Associate the playtime to the given pet.
+            playtime.PetId = pet.Id;
+            // pet.HungerLevel = 3;
+            // pet.HappinessLevel = 5;
+
+            _context.Playtimes.Add(playtime);
+            await _context.SaveChangesAsync();
+
+            // Return the new playtime to the response of the API
+            return Ok(playtime);
+        }
+
+        // Add feedings to a pet
+        // POST: /api/Pet/5/Feedings
+        [HttpPost("{id}/Feedings")]
+        public async Task<ActionResult<Feeding>> CreateFeedingsForPet(int id, Feeding feeding)
+        {
+            var pet = await _context.Pets.FindAsync(id);
+
+            if (pet == null)
+            {
+                return NotFound();
+            }
+
+            feeding.PetId = pet.Id;
+
+            _context.Feedings.Add(feeding);
+            await _context.SaveChangesAsync();
+
+            return Ok(feeding);
+        }
+
+        // Add scoldings to a pet
+        // POST: /api/Pet/5/Scoldings
+        [HttpPost("{id}/Scoldings")]
+        public async Task<ActionResult<Scolding>> CreateScoldingsForPet(int id, Scolding scolding)
+        {
+            var pet = await _context.Pets.FindAsync(id);
+
+            if (pet == null)
+            {
+                return NotFound();
+            }
+
+            scolding.PetId = pet.Id;
+
+            _context.Scoldings.Add(scolding);
+            await _context.SaveChangesAsync();
+
+            return Ok(scolding);
         }
 
         // Private helper method that looks up an existing pet by the supplied id
