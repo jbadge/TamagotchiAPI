@@ -33,14 +33,10 @@ namespace TamagotchiAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pet>>> GetPets()
         {
+            foreach (var item in _context.Pets) { if (item.LastInteractedWithDate != DateTime.MinValue) { item.IsDeadMethod(); } }
+
             // Uses the database context in `_context` to request all of the Pets, sort
             // them by row id and return them as a JSON array.
-
-            foreach (var item in _context.Pets)
-            {
-                item.IsDeadMethod();
-            }
-
             return await _context.Pets.OrderBy(row => row.Id).Include(pet => pet.Playtimes).Include(pet => pet.Feedings).Include(pet => pet.Scoldings).ToListAsync();
         }
 
