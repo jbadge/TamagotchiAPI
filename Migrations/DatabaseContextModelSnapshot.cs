@@ -60,6 +60,12 @@ namespace TamagotchiAPI.Migrations
                     b.Property<int>("HungerLevel")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsDead")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastInteractedWithDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 

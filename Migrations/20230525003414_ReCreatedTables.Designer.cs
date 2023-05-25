@@ -12,8 +12,8 @@ using TamagotchiAPI.Models;
 namespace TamagotchiAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230524231046_AddedIsDeadPropAndMethod")]
-    partial class AddedIsDeadPropAndMethod
+    [Migration("20230525003414_ReCreatedTables")]
+    partial class ReCreatedTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

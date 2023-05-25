@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TamagotchiAPI.Migrations
 {
-    public partial class AddedIsDeadPropAndMethod : Migration
+    public partial class ReAddedIsDeadPropAndMethod : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

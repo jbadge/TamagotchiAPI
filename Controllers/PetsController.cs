@@ -36,6 +36,11 @@ namespace TamagotchiAPI.Controllers
             // Uses the database context in `_context` to request all of the Pets, sort
             // them by row id and return them as a JSON array.
 
+            foreach (var item in _context.Pets)
+            {
+                item.IsDeadMethod();
+            }
+
             return await _context.Pets.OrderBy(row => row.Id).Include(pet => pet.Playtimes).Include(pet => pet.Feedings).Include(pet => pet.Scoldings).ToListAsync();
         }
 
@@ -181,6 +186,7 @@ namespace TamagotchiAPI.Controllers
             playtime.PetId = pet.Id;
             pet.HungerLevel += 3;
             pet.HappinessLevel += 5;
+            pet.LastInteractedWithDate = DateTime.UtcNow;
 
             _context.Playtimes.Add(playtime);
             await _context.SaveChangesAsync();
@@ -205,6 +211,7 @@ namespace TamagotchiAPI.Controllers
             feeding.PetId = pet.Id;
             pet.HungerLevel -= 5;
             pet.HappinessLevel += 3;
+            pet.LastInteractedWithDate = DateTime.UtcNow;
 
             _context.Feedings.Add(feeding);
             await _context.SaveChangesAsync();
@@ -227,6 +234,7 @@ namespace TamagotchiAPI.Controllers
             var scolding = new Scolding();
             scolding.PetId = pet.Id;
             pet.HappinessLevel -= 5;
+            pet.LastInteractedWithDate = DateTime.UtcNow;
 
             _context.Scoldings.Add(scolding);
             await _context.SaveChangesAsync();
