@@ -31,13 +31,14 @@ namespace TamagotchiAPI.Controllers
         // Returns a list of all your Pets
         //
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pet>>> GetPets()
+        public async Task<ActionResult<IEnumerable<Pet>>> GetPets(bool isDead = false)
         {
+
             foreach (var item in _context.Pets) { if (item.LastInteractedWithDate != DateTime.MinValue) { item.IsDeadMethod(); } }
 
             // Uses the database context in `_context` to request all of the Pets, sort
             // them by row id and return them as a JSON array.
-            return await _context.Pets.OrderBy(row => row.Id).Include(pet => pet.Playtimes).Include(pet => pet.Feedings).Include(pet => pet.Scoldings).ToListAsync();
+            return await _context.Pets.Where(x => x.IsDead == isDead).OrderBy(row => row.Id).Include(pet => pet.Playtimes).Include(pet => pet.Feedings).Include(pet => pet.Scoldings).ToListAsync();
         }
 
         // GET: api/Pets/5
@@ -50,7 +51,8 @@ namespace TamagotchiAPI.Controllers
         public async Task<ActionResult<Pet>> GetPet(int id)
         {
             // Find the pet in the database using `FindAsync` to look it up by id
-            var pet = await _context.Pets.FindAsync(id);
+            // var pet = await _context.Pets.FindAsync(id);
+            var pet = await _context.Pets.Include(pet => pet.Playtimes).Include(pet => pet.Feedings).Include(pet => pet.Scoldings).FirstOrDefaultAsync(x => x.Id == id);
 
             // If we didn't find anything, we receive a `null` in return
             if (pet == null)

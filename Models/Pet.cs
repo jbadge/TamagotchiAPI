@@ -17,6 +17,8 @@ namespace TamagotchiAPI.Models
         // OR OTHER WAY TO REPRESENT HAS NOT BEEN INTERACTED WITH? 
         // MAYBE IDK LastInter.. is STRING DURING CREATION
         // THEN SET TO DATETIME WHEN INTERACTION OCCURS??
+
+        // MAYBE HAVE IsDead ONLY SHOW AFTER CREATION??
         // public bool? IsDead { get; set; } = null;
 
         public List<Playtime> Playtimes { get; set; }
