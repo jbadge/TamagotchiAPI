@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,9 @@ namespace TamagotchiAPI
     {
         public static async Task Main(string[] args)
         {
+            Console.WriteLine("Welcome to Tamagotchi!");
+            Menu.MainMenu();
+
             var host = Utilities.CreateWebHostBuilder(args).Build();
 
             using (var scope = host.Services.CreateScope())
@@ -29,6 +33,7 @@ namespace TamagotchiAPI
             Utilities.Notify("TamagotchiAPI Running!");
 
             WebHostExtensions.WaitForShutdown(host);
+
         }
     }
 }
