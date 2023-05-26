@@ -12,7 +12,6 @@ namespace TamagotchiAPI
     {
         public static async Task Main(string[] args)
         {
-            Console.WriteLine("Welcome to Tamagotchi!");
             Menu.MainMenu();
 
             var host = Utilities.CreateWebHostBuilder(args).Build();
