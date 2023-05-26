@@ -36,11 +36,11 @@ namespace TamagotchiAPI
             //             Welcome to...");
             string text = @"
                                                                                                   88          88  
-          ,d                                                                      ,d              88         \""
-          88                                                                      88              88";
-            MM88MMM ,adPPYYba, 88,dPYba,,adPYba,  ,adPPYYba,  ,adPPYb,d8  ,adPPYba, MM88MMM ,adPPYba, 88,dPPYba,  88
-          88   \"\"    \`Y8 88P\' \"88\"  \"8a\"\"    `Y8 a8\"   `Y88 a8\"   \"8a  88   a8\"   \"\"88P\'  \"8a 88";
-            88    ,adPPPPP88 88      88      88 ,adPPPPP88 8b       88 8b d8  88   8b         88       88 88";
+          ,d                                                                      ,d              88          ""
+          88                                                                      88              88
+        MM88MMM ,adPPYYba, 88,dPYba,,adPYba,  ,adPPYYba,  ,adPPYb,d8  ,adPPYba, MM88MMM ,adPPYba, 88,dPPYba,  88
+          88    ""     `Y8 88P'   "88"    "8a ""     `Y8 a8"    `Y88 a8"     "8a  88   a8"     "" 88P'    "8a 88
+          88    ,adPPPPP88 88      88      88 ,adPPPPP88 8b       88 8b d8  88   8b         88       88 88
           88,   88,    ,88 88      88      88 88,    ,88 "8a,   ,d88 "8a,   ,a8"  88   "8a,   ,aa 88       88 88
           "Y888 `"8bbdP"Y8 88      88      88 `"8bbdP"Y8  `"YbbdP"Y8  `"YbbdP"'   "Y888 '"Ybbd8"' 88       88 88
                                                                       aa,    ,88
