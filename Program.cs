@@ -12,9 +12,9 @@ namespace TamagotchiAPI
     {
         public static async Task Main(string[] args)
         {
-            Menu.MainMenu();
-
-            var host = Utilities.CreateWebHostBuilder(args).Build();
+            // Menu.MainMenu();
+ 
+            var host = Utilities.CreateWebHostBuilder(args).UseUrls("http://*:5000").Build();
 
             using (var scope = host.Services.CreateScope())
             {

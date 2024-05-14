@@ -12,8 +12,8 @@ using TamagotchiAPI.Models;
 namespace TamagotchiAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230524223750_AddedAllDetailsToGetPets")]
-    partial class AddedAllDetailsToGetPets
+    [Migration("20240430230115_AddsDateTimeToLastInteractCreate")]
+    partial class AddsDateTimeToLastInteractCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,7 +62,19 @@ namespace TamagotchiAPI.Migrations
                     b.Property<int>("HungerLevel")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDead")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastInteractedWithDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SpriteUrl")
                         .HasColumnType("text");
 
                     b.HasKey("Id");

@@ -12,8 +12,8 @@ using TamagotchiAPI.Models;
 namespace TamagotchiAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230525234828_AddIsDeadQueryParameter")]
-    partial class AddIsDeadQueryParameter
+    [Migration("20240425233714_AddsImageUrl")]
+    partial class AddsImageUrl
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -61,6 +61,9 @@ namespace TamagotchiAPI.Migrations
 
                     b.Property<int>("HungerLevel")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDead")
                         .HasColumnType("boolean");

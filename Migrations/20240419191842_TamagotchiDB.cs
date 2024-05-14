@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace TamagotchiAPI.Migrations
 {
-    public partial class ReCreatedTables : Migration
+    public partial class TamagotchiDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

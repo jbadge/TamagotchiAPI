@@ -60,6 +60,9 @@ namespace TamagotchiAPI.Migrations
                     b.Property<int>("HungerLevel")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsDead")
                         .HasColumnType("boolean");
 
@@ -67,6 +70,9 @@ namespace TamagotchiAPI.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SpriteUrl")
                         .HasColumnType("text");
 
                     b.HasKey("Id");

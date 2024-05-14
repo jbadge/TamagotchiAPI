@@ -12,8 +12,8 @@ using TamagotchiAPI.Models;
 namespace TamagotchiAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230524235049_ReAddedIsDeadPropAndMethod")]
-    partial class ReAddedIsDeadPropAndMethod
+    [Migration("20240426012005_AddsSpriteUrl")]
+    partial class AddsSpriteUrl
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,6 +62,9 @@ namespace TamagotchiAPI.Migrations
                     b.Property<int>("HungerLevel")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsDead")
                         .HasColumnType("boolean");
 
@@ -69,6 +72,9 @@ namespace TamagotchiAPI.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SpriteUrl")
                         .HasColumnType("text");
 
                     b.HasKey("Id");

@@ -12,8 +12,8 @@ using TamagotchiAPI.Models;
 namespace TamagotchiAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230525003414_ReCreatedTables")]
-    partial class ReCreatedTables
+    [Migration("20240419191842_TamagotchiDB")]
+    partial class TamagotchiDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

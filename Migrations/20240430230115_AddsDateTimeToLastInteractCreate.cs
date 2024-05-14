@@ -4,7 +4,7 @@
 
 namespace TamagotchiAPI.Migrations
 {
-    public partial class AddingListToGetSpecificPet : Migration
+    public partial class AddsDateTimeToLastInteractCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
