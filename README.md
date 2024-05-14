@@ -43,7 +43,7 @@ During pet creation, Birthday defaults to the current DateTime, Hunger Level def
 | `POST`   | `/api/Pets`             | Create a new pet.                                                                    |
 | `GET`    | `/api/Pets/5`           | Retrieve pet #id                                                                     |
 | `PUT`    | `/api/Pets/5`           | Update pet #5 to dead                                                                |
-| `DELETE` | `/api/Pets/5            | Delete pet #5.                                                                       |
+| `DELETE` | `/api/Pets/5`           | Delete pet #5.                                                                       |
 | `POST`   | `/api/Pets/5/Playtimes` | Add a playtime to pet #5, adding 5 to Happiness and 3 to Hunger levels.              |
 | `POST`   | `/api/Pets/5/Feedings`  | Add a feeding to pet #5, subtracting 5 from Hunger and adding 3 to Happiness levels. |
 | `POST`   | `/api/Pets/5/Scoldings` | Add a scolding to post #5, subtracting 5 from Happiness level.                       |
