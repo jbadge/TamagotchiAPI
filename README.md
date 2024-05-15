@@ -1,18 +1,23 @@
+[![C#][C#.com]][C#-url]
+[![.NET][.NET.com]][.NET-url]
+[![PostgreSQL][PostgreSQL.com]][PostgreSQL-url]
+
 # TamagotchiAPI
 
 An API that allows a user to create and care for a virtual pet, akin to a Tamagotchi Virtual Pet.
 
-**Link to front-end:** https://github.com/jbadge/TamagotchiFrontEnd
+**Link to frontend:** https://github.com/jbadge/TamagotchiFrontEnd
 
 **Link to static implementation of project:** https://tamagotchi-reloaded-jb.netlify.app/
 
 ## How It's Made:
 
-**Tech used:** ASP.NET CORE, C#, Entity Framework, PostgreSQL
+**Tech used:**
+ASP.NET CORE, C#, Entity Framework, PostgreSQL
 
-This RESTful backend is built using C#. Entity Framework is used to run SQL queries to a PostgreSQL database.
+This RESTful API is built using C#. Entity Framework is used to run SQL queries to a PostgreSQL database.
 
-## Optimizations
+## Optimizations:
 
 I added a PUT method in order to make on-the-fly changes to pets for diagnostic purposes. I also have (currently commented out) code in order to run on external devices within a LAN, both in the frontend and backend code. Not only did this help with testing, as I did not deploy the backend codebase, but also allowed my 7 year old to have her own database, resulting in a happy 7 year old.
 
@@ -20,7 +25,7 @@ I added a PUT method in order to make on-the-fly changes to pets for diagnostic 
 
 How to implement a full-stack application by building a backend API. After all was said and done, I was fascinated by the simplicity of the HTTP requests. Seeing it all come together after the frontend was built, with the SQL queries to the database resulting in a fun, interactive pet database, was very satisfying.
 
-## Endpoints
+## API
 
 Please note, the API uses PUT instead of PATCH for updating.
 
@@ -35,11 +40,11 @@ Please note, the API uses PUT instead of PATCH for updating.
 
 ### Examples
 
-During pet creation, Birthday defaults to the current DateTime, Hunger Level defaults to 0 and Happiness Level defaults to 0.
+During pet creation, Birthday defaults to the current DateTime, Hunger Level defaults to 0 and Happiness Level defaults to 0. When a pet is updated, the API sets the LastInteractedWithDate to the current time. If LastInteractedWithDate is over three days old, IsDead will return true; otherwise, it will return false.
 
 | Method   | URL                     | Description                                                                          |
 | -------- | ----------------------- | ------------------------------------------------------------------------------------ |
-| `GET`    | `/api/Pets `            | Retrieve all posts.                                                                  |
+| `GET`    | `/api/Pets `            | Retrieve all pets.                                                                   |
 | `POST`   | `/api/Pets`             | Create a new pet.                                                                    |
 | `GET`    | `/api/Pets/5`           | Retrieve pet #id                                                                     |
 | `PUT`    | `/api/Pets/5`           | Update pet #5 to dead                                                                |
@@ -47,3 +52,11 @@ During pet creation, Birthday defaults to the current DateTime, Hunger Level def
 | `POST`   | `/api/Pets/5/Playtimes` | Add a playtime to pet #5, adding 5 to Happiness and 3 to Hunger levels.              |
 | `POST`   | `/api/Pets/5/Feedings`  | Add a feeding to pet #5, subtracting 5 from Hunger and adding 3 to Happiness levels. |
 | `POST`   | `/api/Pets/5/Scoldings` | Add a scolding to post #5, subtracting 5 from Happiness level.                       |
+
+[product-screenshot]: /images/screenshot.png
+[.NET.com]: https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white
+[.NET-url]: https://dotnet.microsoft.com/en-us/learn/dotnet/what-is-dotnet
+[PostgreSQL.com]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
+[PostgreSQL-url]: https://www.postgresql.org
+[C#.com]: https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white
+[C#-url]: https://learn.microsoft.com/en-us/dotnet/csharp
