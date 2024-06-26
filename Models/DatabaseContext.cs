@@ -40,7 +40,9 @@ namespace TamagotchiAPI.Models
 
         private string ConvertPostConnectionToConnectionString(string connection)
         {
-            var _connection = connection.Replace("postgres://", String.Empty);
+            var _connection =
+            // connection.Replace("postgres://", String.Empty);
+            "postgresql://tamagotchi_api_database_user:eSyKhhwx75i0k8rDxE6dPsbLkgilhFY0@dpg-cptlpe52ng1s73e35db0-a.oregon-postgres.render.com/tamagotchi_api_database";
 
             var connectionParts = Regex.Split(_connection, ":|@|/");
 
