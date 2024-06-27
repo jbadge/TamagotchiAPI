@@ -32,12 +32,12 @@ COPY . ./
 # Restore as distinct layers
 RUN dotnet restore
 # Build and publish a release
-RUN dotnet publish -c Release -o
+RUN dotnet publish -c Release -o out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /TamagotchiAPI
-COPY --from=build-env /TamagotchiAPI/publish .
+COPY --from=build-env /TamagotchiAPI/out .
 ENTRYPOINT ["dotnet", "TamagotchiAPI.dll"]
 
 
