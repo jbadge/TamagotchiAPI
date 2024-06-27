@@ -38,11 +38,7 @@ namespace TamagotchiAPI
             });
 
             // Configure the class to use for a DatabaseContext
-            services.AddDbContext<DatabaseContext>(options =>
-            {
-                // Configure the context to read from appsettings.json
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
-            });
+            services.AddDbContext<DatabaseContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
