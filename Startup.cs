@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -37,7 +38,11 @@ namespace TamagotchiAPI
             });
 
             // Configure the class to use for a DatabaseContext
-            services.AddDbContext<DatabaseContext>();
+            services.AddDbContext<DatabaseContext>(options =>
+            {
+                // Configure the context to read from appsettings.json
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
