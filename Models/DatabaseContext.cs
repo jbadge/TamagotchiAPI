@@ -32,7 +32,23 @@ namespace TamagotchiAPI.Models
                 var databaseURL = Environment.GetEnvironmentVariable("DATABASE_URL");
                 var defaultConnectionString = $"server=localhost;database={DEVELOPMENT_DATABASE_NAME}";
 
-                var conn = databaseURL != null ? ConvertPostConnectionToConnectionString(databaseURL) : defaultConnectionString;
+                // var conn = databaseURL != null ? ConvertPostConnectionToConnectionString(databaseURL) : defaultConnectionString;
+                string conn;
+
+                // Only convert if it's a URL format starting with "postgres://"
+                if (!string.IsNullOrEmpty(databaseURL) && databaseURL.StartsWith("postgres://"))
+                {
+                    conn = ConvertPostConnectionToConnectionString(databaseURL);
+                }
+                // If DATABASE_URL is already a connection string format, use as is
+                else if (!string.IsNullOrEmpty(databaseURL))
+                {
+                    conn = databaseURL;
+                }
+                else
+                {
+                    conn = defaultConnectionString;
+                }
 
                 optionsBuilder.UseNpgsql(conn);
             }
