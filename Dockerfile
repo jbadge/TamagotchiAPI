@@ -38,6 +38,8 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /TamagotchiAPI
 COPY --from=build-env /TamagotchiAPI/out .
+
+EXPOSE 80
 ENTRYPOINT ["dotnet", "TamagotchiAPI.dll"]
 
 
