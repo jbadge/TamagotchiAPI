@@ -55,12 +55,38 @@ namespace TamagotchiAPI.Models
         }
 
         private string ConvertPostConnectionToConnectionString(string connection)
+        // {
+        //     var _connection = connection.Replace("postgres://", "").Replace("postgresql://", "");
+
+        //     var connectionParts = Regex.Split(_connection, ":|@|/");
+
+        //     return $"server={connectionParts[2]};SSL Mode=Require;Trust Server Certificate=true;database={connectionParts[4]};User Id={connectionParts[0]};password={connectionParts[1]};port={connectionParts[3]}";
+        // }
         {
-            var _connection = connection.Replace("postgres://", "").Replace("postgresql://", "");
+            if (connection.Contains("pooler.supabase.com"))
+            {
+                // Return as-is for pooler (might want to add SSL Mode if needed)
+                return connection;
+            }
 
-            var connectionParts = Regex.Split(_connection, ":|@|/");
+            var uri = new Uri(connection);
 
-            return $"server={connectionParts[2]};SSL Mode=Require;Trust Server Certificate=true;database={connectionParts[4]};User Id={connectionParts[0]};password={connectionParts[1]};port={connectionParts[3]}";
+            var userInfoParts = uri.UserInfo.Split(':');
+            var user = userInfoParts[0];
+            var password = userInfoParts.Length > 1 ? userInfoParts[1] : "";
+
+            var builder = new Npgsql.NpgsqlConnectionStringBuilder
+            {
+                Host = uri.Host,
+                Port = uri.Port,
+                Username = user,
+                Password = password,
+                Database = uri.AbsolutePath.TrimStart('/'),
+                SslMode = Npgsql.SslMode.Require,
+                TrustServerCertificate = true
+            };
+
+            return builder.ConnectionString;
         }
     }
 }
