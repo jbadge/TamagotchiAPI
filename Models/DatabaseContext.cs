@@ -60,7 +60,7 @@ namespace TamagotchiAPI.Models
 
             var connectionParts = Regex.Split(_connection, ":|@|/");
 
-            return $"Host={connectionParts[2]};Port={connectionParts[3]};User Id={connectionParts[0]};Password={connectionParts[1]};Database={connectionParts[4]};SSL Mode=Require;Trust Server Certificate=true;HostAddressFamily=InterNetwork";
+            return $"server={connectionParts[2]};SSL Mode=Require;Trust Server Certificate=true;database={connectionParts[4]};User Id={connectionParts[0]};password={connectionParts[1]};port={connectionParts[3]}";
         }
     }
 }

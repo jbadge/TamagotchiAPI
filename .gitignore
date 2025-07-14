@@ -336,4 +336,5 @@ ASALocalRun/
 # Exclude all the Mac .DS_Store
 **/.DS_Store
 
-
+# Exclude dump.sql
+dump.sql
