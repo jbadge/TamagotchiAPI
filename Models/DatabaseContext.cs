@@ -32,17 +32,16 @@ namespace TamagotchiAPI.Models
                 var databaseURL = Environment.GetEnvironmentVariable("DATABASE_URL");
                 var defaultConnectionString = $"server=localhost;database={DEVELOPMENT_DATABASE_NAME}";
 
-                // var conn = databaseURL != null ? ConvertPostConnectionToConnectionString(databaseURL) : defaultConnectionString;
                 string conn;
 
-                // Only convert if it's a URL format starting with "postgres://"
-                if (!string.IsNullOrEmpty(databaseURL) && databaseURL.StartsWith("postgres://"))
+                if (!string.IsNullOrEmpty(databaseURL) && (databaseURL.StartsWith("postgres://") || databaseURL.StartsWith("postgresql://")))
+
                 {
                     conn = ConvertPostConnectionToConnectionString(databaseURL);
                 }
-                // If DATABASE_URL is already a connection string format, use as is
                 else if (!string.IsNullOrEmpty(databaseURL))
                 {
+                    // DATABASE_URL is already a standard connection string (not URL), so use as is
                     conn = databaseURL;
                 }
                 else
@@ -50,14 +49,14 @@ namespace TamagotchiAPI.Models
                     conn = defaultConnectionString;
                 }
 
+
                 optionsBuilder.UseNpgsql(conn);
             }
         }
 
         private string ConvertPostConnectionToConnectionString(string connection)
         {
-            var _connection =
-            connection.Replace("postgres://", string.Empty);
+            var _connection = connection.Replace("postgres://", "").Replace("postgresql://", "");
 
             var connectionParts = Regex.Split(_connection, ":|@|/");
 
