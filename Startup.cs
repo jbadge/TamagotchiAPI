@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Npgsql;
+using TamagotchiAPI.Configuration;
 using TamagotchiAPI.Models;
 
 namespace TamagotchiAPI
@@ -38,6 +41,9 @@ namespace TamagotchiAPI
 
             // Configure the class to use for a DatabaseContext
             services.AddDbContext<DatabaseContext>();
+
+            // Bind configuration section "AppSettings" to AppSettings class
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,6 +83,25 @@ namespace TamagotchiAPI
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "TamagotchiAPI");
                 c.RoutePrefix = String.Empty;
+            });
+
+            // Middleware to inject Visitor ID into PostgreSQL session variable
+            // Enable Row-Level Security policies to filter data per visitor
+            app.Use(async (context, next) =>
+            {
+                var visitorId = context.Request.Headers["x-visitor-id"].FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(visitorId))
+                {
+                    await using var cmd = context.RequestServices
+                        .GetRequiredService<NpgsqlConnection>()
+                        .CreateCommand();
+
+                    cmd.CommandText = $"set local request.jwt.claim.sub = '{visitorId}'";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                await next();
             });
 
             // Use routing to determine which endpoints are handled by which controllers and methods
