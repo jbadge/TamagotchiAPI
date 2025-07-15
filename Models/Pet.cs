@@ -20,6 +20,9 @@ namespace TamagotchiAPI.Models
         public string SpriteUrl { get; set; }
         public string ImageUrl { get; set; }
 
+        public string VisitorId { get; set; }
+        public DateTime CreatedAt { get; set; }
+
         public void IsDeadMethod()
         {
             if (IsDead)

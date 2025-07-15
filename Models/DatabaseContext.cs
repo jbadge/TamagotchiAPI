@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,10 @@ namespace TamagotchiAPI.Models
         public DbSet<Playtime> Playtimes { get; set; }
         public DbSet<Feeding> Feedings { get; set; }
         public DbSet<Scolding> Scoldings { get; set; }
+        public string VisitorId { get; set; }
+
+        public IQueryable<Pet> GetVisitorPets() =>
+    Pets.Where(p => p.VisitorId == VisitorId);
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -19,12 +19,20 @@ namespace TamagotchiAPI.Controllers
         // This is the variable you use to have access to your database
         private readonly DatabaseContext _context;
 
+        private string? _visitorId;
+
         // Constructor that receives a reference to your database context
         // and stores it in _context for you to use in your API methods
         public PetsController(DatabaseContext context)
         {
             _context = context;
         }
+
+        private string? GetVisitorId()
+        {
+            return Request.Headers["x-visitor-id"].FirstOrDefault();
+        }
+
 
         // GET: api/Pets
         //
@@ -35,16 +43,27 @@ namespace TamagotchiAPI.Controllers
             bool isDead = false
             )
         {
+            if (!await EnsureVisitorContext()) return Unauthorized();
 
-            foreach (var item in _context.Pets) { if (item.LastInteractedWithDate != DateTime.MinValue) { item.IsDeadMethod(); } }
+            foreach (var item in _context.Pets)
+            {
+                if (item.LastInteractedWithDate != DateTime.MinValue)
+                {
+                    item.IsDeadMethod();
+                }
+            }
 
             // Uses the database context in `_context` to request all of the Pets, sort
             // them by row id and return them as a JSON array.
             return await _context.Pets.
+             Where(p => p.VisitorId == _visitorId).
             // Where(x => x.IsDead == isDead).
             OrderBy(row => row.Id).
             // Include(pet => pet.IsDead).
-            Include(pet => pet.Playtimes).Include(pet => pet.Feedings).Include(pet => pet.Scoldings).ToListAsync();
+            Include(pet => pet.Playtimes).
+            Include(pet => pet.Feedings).
+            Include(pet => pet.Scoldings).
+            ToListAsync();
         }
 
         // GET: api/Pets/5
@@ -56,9 +75,17 @@ namespace TamagotchiAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Pet>> GetPet(int id)
         {
+
+            if (!await EnsureVisitorContext()) return Unauthorized();
+
             // Find the pet in the database using `FindAsync` to look it up by id
             // var pet = await _context.Pets.FindAsync(id);
-            var pet = await _context.Pets.Include(pet => pet.Playtimes).Include(pet => pet.Feedings).Include(pet => pet.Scoldings).FirstOrDefaultAsync(x => x.Id == id);
+            var pet = await _context.Pets.
+                Where(p => p.VisitorId == _visitorId).
+                Include(pet => pet.Playtimes).
+                Include(pet => pet.Feedings).
+                Include(pet => pet.Scoldings).
+                FirstOrDefaultAsync(x => x.Id == id && x.VisitorId == _visitorId);
 
             // If we didn't find anything, we receive a `null` in return
             if (pet == null)
@@ -85,11 +112,23 @@ namespace TamagotchiAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPet(int id, Pet pet)
         {
+
+            if (!await EnsureVisitorContext()) return Unauthorized();
+
             // If the ID in the URL does not match the ID in the supplied request body, return a bad request
             if (id != pet.Id)
             {
                 return BadRequest();
             }
+
+            var exists = await _context.Pets.AnyAsync(p => p.Id == id && p.VisitorId == _visitorId);
+
+            if (!exists)
+            {
+                return NotFound();
+            }
+
+            pet.VisitorId = _visitorId;
 
             // Tell the database to consider everything in pet to be _updated_ values. When
             // the save happens the database will _replace_ the values in the database with the ones from pet
@@ -134,6 +173,11 @@ namespace TamagotchiAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Pet>> PostPet(Pet pet)
         {
+
+            if (!await EnsureVisitorContext()) return Unauthorized();
+
+            pet.VisitorId = _visitorId;
+
             // Indicate to the database context we want to add this new record
             _context.Pets.Add(pet);
             await _context.SaveChangesAsync();
@@ -152,8 +196,12 @@ namespace TamagotchiAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePet(int id)
         {
+
+            if (!await EnsureVisitorContext()) return Unauthorized();
+
             // Find this pet by looking for the specific id
-            var pet = await _context.Pets.FindAsync(id);
+            var pet = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id && p.VisitorId == _visitorId);
+
             if (pet == null)
             {
                 // There wasn't a pet with that id so return a `404` not found
@@ -176,7 +224,9 @@ namespace TamagotchiAPI.Controllers
         public async Task<ActionResult<Playtime>> CreatePlaytimeForPet(int id)
         {
             // First, lets find the pet (by using the ID)
-            var pet = await _context.Pets.FindAsync(id);
+            if (!await EnsureVisitorContext()) return Unauthorized();
+
+            var pet = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id && p.VisitorId == _visitorId); ;
 
             // If the pet doesn't exist: return a 404 Not Found.
             if (pet == null)
@@ -204,7 +254,9 @@ namespace TamagotchiAPI.Controllers
         [HttpPost("{id}/Feedings")]
         public async Task<ActionResult<Feeding>> CreateFeedingForPet(int id)
         {
-            var pet = await _context.Pets.FindAsync(id);
+            if (!await EnsureVisitorContext()) return Unauthorized();
+
+            var pet = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id && p.VisitorId == _visitorId); ;
 
             if (pet == null)
             {
@@ -228,7 +280,9 @@ namespace TamagotchiAPI.Controllers
         [HttpPost("{id}/Scoldings")]
         public async Task<ActionResult<Scolding>> CreateScoldingForPet(int id)
         {
-            var pet = await _context.Pets.FindAsync(id);
+            if (!await EnsureVisitorContext()) return Unauthorized();
+
+            var pet = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id && p.VisitorId == _visitorId); ;
 
             if (pet == null)
             {
@@ -249,7 +303,17 @@ namespace TamagotchiAPI.Controllers
         // Private helper method that looks up an existing pet by the supplied id
         private bool PetExists(int id)
         {
-            return _context.Pets.Any(pet => pet.Id == id);
+            return _context.Pets.Any(p => p.Id == id && p.VisitorId == _visitorId);
+        }
+
+
+        private async Task<bool> EnsureVisitorContext()
+        {
+            _visitorId = GetVisitorId();
+            if (string.IsNullOrEmpty(_visitorId)) return false;
+
+            await _context.Database.ExecuteSqlRawAsync($"select set_config('request.jwt.claim.sub', '{_visitorId}', true)");
+            return true;
         }
     }
 }
