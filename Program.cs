@@ -13,7 +13,12 @@ namespace TamagotchiAPI
         public static async Task Main(string[] args)
         {
 
+            var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+
             var host = Utilities.CreateWebHostBuilder(args)
+            // For Render
+            .UseUrls($"http://*:{port}")
+            // For local
             // .UseUrls("http://*:5000")
             .Build();
 
