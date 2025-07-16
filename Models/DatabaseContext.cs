@@ -24,91 +24,10 @@ namespace TamagotchiAPI.Models
         public IQueryable<Pet> GetVisitorPets() =>
             Pets.Where(p => p.VisitorId == VisitorId);
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Pet>().HasData(
-                new Pet
-                {
-                    Id = 1,
-                    Name = "Bulbasaur",
-                    Birthday = DateTime.UtcNow,
-                    HungerLevel = 0,
-                    HappinessLevel = 0,
-                    LastInteractedWithDate = DateTime.UtcNow,
-                    IsDead = false,
-                    ImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png",
-                    SpriteUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/1.png",
-                    VisitorId = null
-                },
-                new Pet
-                {
-                    Id = 2,
-                    Name = "Charmander",
-                    Birthday = DateTime.UtcNow,
-                    HungerLevel = 0,
-                    HappinessLevel = 0,
-                    LastInteractedWithDate = DateTime.UtcNow,
-                    IsDead = false,
-                    ImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png",
-                    SpriteUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/4.png",
-                    VisitorId = null
-                },
-                new Pet
-                {
-                    Id = 3,
-                    Name = "Squirtle",
-                    Birthday = DateTime.UtcNow,
-                    HungerLevel = 0,
-                    HappinessLevel = 0,
-                    LastInteractedWithDate = DateTime.UtcNow,
-                    IsDead = false,
-                    ImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png",
-                    SpriteUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/7.png",
-                    VisitorId = null
-                },
-                new Pet
-                {
-                    Id = 4,
-                    Name = "Caterpie",
-                    Birthday = DateTime.UtcNow,
-                    HungerLevel = 0,
-                    HappinessLevel = 0,
-                    LastInteractedWithDate = DateTime.UtcNow,
-                    IsDead = false,
-                    ImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10.png",
-                    SpriteUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/10.png",
-                    VisitorId = null
-                },
-                new Pet
-                {
-                    Id = 5,
-                    Name = "Pikachu",
-                    Birthday = DateTime.UtcNow,
-                    HungerLevel = 0,
-                    HappinessLevel = 0,
-                    LastInteractedWithDate = DateTime.UtcNow,
-                    IsDead = false,
-                    ImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
-                    SpriteUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/25.png",
-                    VisitorId = null
-                },
-                new Pet
-                {
-                    Id = 6,
-                    Name = "Eevee",
-                    Birthday = DateTime.UtcNow,
-                    HungerLevel = 0,
-                    HappinessLevel = 0,
-                    LastInteractedWithDate = DateTime.UtcNow,
-                    IsDead = false,
-                    ImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png",
-                    SpriteUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-vi/omegaruby-alphasapphire/133.png",
-                    VisitorId = null
-                }
-            );
-        }
+        // protected override void OnModelCreating(ModelBuilder modelBuilder)
+        // {
+        //     base.OnModelCreating(modelBuilder);
+        // }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
