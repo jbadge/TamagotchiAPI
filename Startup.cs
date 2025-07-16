@@ -39,6 +39,9 @@ namespace TamagotchiAPI
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TamagotchiAPI", Version = "v1" });
             });
 
+            // Add IHttpContextAccessor to access HTTP context in controllers and middleware
+            services.AddHttpContextAccessor();
+
             // Configure the class to use for a DatabaseContext
             services.AddDbContext<DatabaseContext>();
 
@@ -85,11 +88,16 @@ namespace TamagotchiAPI
                 c.RoutePrefix = String.Empty;
             });
 
+            // Use custom middleware to enforce presence of 'x-visitor-id' header
+            // and set visitor ID in PostgreSQL session variable for RLS
+            app.UseMiddleware<VisitorIdMiddleware>();
+
             // Middleware to inject Visitor ID into PostgreSQL session variable
             // Enable Row-Level Security policies to filter data per visitor
             app.Use(async (context, next) =>
             {
                 var visitorId = context.Request.Headers["x-visitor-id"].FirstOrDefault();
+                var adminVisitorId = Configuration["AppSettings:AdminVisitorId"];
 
                 if (!string.IsNullOrEmpty(visitorId))
                 {
@@ -99,10 +107,20 @@ namespace TamagotchiAPI
 
                     cmd.CommandText = $"set local request.jwt.claim.sub = '{visitorId}'";
                     await cmd.ExecuteNonQueryAsync();
+
+                    // If visitorId is admin secret, set the role to admin_role to bypass RLS filter
+                    if (visitorId == adminVisitorId)
+                    {
+                        cmd.CommandText = "set local role admin_role";
+                        await cmd.ExecuteNonQueryAsync();
+                    }
                 }
 
                 await next();
             });
+
+            // Add visitor ID middleware BEFORE routing
+            app.UseMiddleware<VisitorIdMiddleware>();
 
             // Use routing to determine which endpoints are handled by which controllers and methods
             app.UseRouting();
