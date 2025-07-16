@@ -36,6 +36,12 @@ namespace TamagotchiAPI.Controllers
             bool isDead = false
             )
         {
+            Console.WriteLine("[Request Headers]");
+            foreach (var header in Request.Headers)
+            {
+                Console.WriteLine($"{header.Key}: {header.Value}");
+            }
+
             var visitorId = VisitorId;
             if (string.IsNullOrEmpty(visitorId))
             {
