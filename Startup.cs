@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -101,26 +102,19 @@ namespace TamagotchiAPI
 
                 if (!string.IsNullOrEmpty(visitorId))
                 {
-                    await using var cmd = context.RequestServices
-                        .GetRequiredService<NpgsqlConnection>()
-                        .CreateCommand();
+                    var db = context.RequestServices.GetRequiredService<DatabaseContext>();
 
-                    cmd.CommandText = $"set local request.jwt.claim.sub = '{visitorId}'";
-                    await cmd.ExecuteNonQueryAsync();
+                    await db.Database.ExecuteSqlRawAsync($"set local request.jwt.claim.sub = '{visitorId}'");
 
                     // If visitorId is admin secret, set the role to admin_role to bypass RLS filter
                     if (visitorId == adminVisitorId)
                     {
-                        cmd.CommandText = "set local role admin_role";
-                        await cmd.ExecuteNonQueryAsync();
+                        await db.Database.ExecuteSqlRawAsync("set local role admin_role");
                     }
                 }
 
                 await next();
             });
-
-            // Add visitor ID middleware BEFORE routing
-            app.UseMiddleware<VisitorIdMiddleware>();
 
             // Use routing to determine which endpoints are handled by which controllers and methods
             app.UseRouting();
