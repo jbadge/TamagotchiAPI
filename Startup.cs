@@ -113,7 +113,10 @@ namespace TamagotchiAPI
                         {
                             // Set visitor role and claim
                             await db.Database.ExecuteSqlRawAsync("set local role visitor_role");
-                            await db.Database.ExecuteSqlRawAsync("set local request.jwt.claim.sub = {0}", visitorId);
+
+                            // Escape single quotes in visitorId to avoid SQL injection
+                            var escapedVisitorId = visitorId.Replace("'", "''");
+                            await db.Database.ExecuteSqlRawAsync($"set local request.jwt.claim.sub = '{escapedVisitorId}'");
                         }
                     }
 
