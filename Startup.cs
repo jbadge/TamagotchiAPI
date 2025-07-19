@@ -96,25 +96,29 @@ namespace TamagotchiAPI
             // Middleware to inject Visitor ID into PostgreSQL session variable
             // Enable Row-Level Security policies to filter data per visitor
             app.Use(async (context, next) =>
-            {
-                var visitorId = context.Request.Headers["x-visitor-id"].FirstOrDefault();
-                var adminVisitorId = Configuration["AppSettings:AdminVisitorId"];
-
-                if (!string.IsNullOrEmpty(visitorId))
                 {
-                    var db = context.RequestServices.GetRequiredService<DatabaseContext>();
+                    var visitorId = context.Request.Headers["x-visitor-id"].FirstOrDefault();
+                    var adminVisitorId = Configuration["AppSettings:AdminVisitorId"];
 
-                    await db.Database.ExecuteSqlRawAsync($"set local request.jwt.claim.sub = '{visitorId}'");
-
-                    // If visitorId is admin secret, set the role to admin_role to bypass RLS filter
-                    if (visitorId == adminVisitorId)
+                    if (!string.IsNullOrEmpty(visitorId))
                     {
-                        await db.Database.ExecuteSqlRawAsync("set local role admin_role");
-                    }
-                }
+                        var db = context.RequestServices.GetRequiredService<DatabaseContext>();
 
-                await next();
-            });
+                        if (visitorId == adminVisitorId)
+                        {
+                            // Set admin role — no claim needed
+                            await db.Database.ExecuteSqlRawAsync("set local role admin_role");
+                        }
+                        else
+                        {
+                            // Set visitor role and claim
+                            await db.Database.ExecuteSqlRawAsync("set local role visitor_role");
+                            await db.Database.ExecuteSqlRawAsync("set local request.jwt.claim.sub = {0}", visitorId);
+                        }
+                    }
+
+                    await next();
+                });
 
             // Use routing to determine which endpoints are handled by which controllers and methods
             app.UseRouting();

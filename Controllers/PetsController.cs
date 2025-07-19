@@ -40,12 +40,6 @@ namespace TamagotchiAPI.Controllers
             bool isDead = false
             )
         {
-            Console.WriteLine("[Request Headers]");
-            foreach (var header in Request.Headers)
-            {
-                Console.WriteLine($"{header.Key}: {header.Value}");
-            }
-
             if (string.IsNullOrEmpty(VisitorId) && !IsAdmin)
             {
                 return Unauthorized();
@@ -64,9 +58,6 @@ namespace TamagotchiAPI.Controllers
                     item.IsDeadMethod();
                 }
             }
-
-            // .Where(pets => pets.VisitorId == VisitorId || pets.VisitorId == null)
-
             // if (isDead)
             //     {
             //         pets = pets.Where(pets => pets.IsDead).ToList();

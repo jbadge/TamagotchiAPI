@@ -33,11 +33,11 @@ namespace TamagotchiAPI
                 }
             }
 
-            var task = host.RunAsync();
-
             Utilities.Notify("TamagotchiAPI Running!");
 
-            WebHostExtensions.WaitForShutdown(host);
+            await host.StartAsync();
+
+            await host.WaitForShutdownAsync();
 
         }
     }
