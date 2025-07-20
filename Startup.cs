@@ -98,7 +98,8 @@ namespace TamagotchiAPI
             app.Use(async (context, next) =>
                 {
                     var visitorId = context.Request.Headers["x-visitor-id"].FirstOrDefault();
-                    var adminVisitorId = Configuration["AppSettings:AdminVisitorId"];
+                    var adminVisitorId = Configuration["AdminVisitorId"];
+                    // var adminVisitorId = Environment.GetEnvironmentVariable("ADMIN_VISITOR_ID");
 
                     if (!string.IsNullOrEmpty(visitorId))
                     {

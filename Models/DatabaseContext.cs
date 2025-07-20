@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -23,11 +22,6 @@ namespace TamagotchiAPI.Models
 
         public IQueryable<Pet> GetVisitorPets() =>
             Pets.Where(p => p.VisitorId == VisitorId);
-
-        // protected override void OnModelCreating(ModelBuilder modelBuilder)
-        // {
-        //     base.OnModelCreating(modelBuilder);
-        // }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
