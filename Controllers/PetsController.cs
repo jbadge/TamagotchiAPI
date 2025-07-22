@@ -141,12 +141,19 @@ namespace TamagotchiAPI.Controllers
                 return BadRequest();
             }
 
-            var exists = await _context.Pets.AnyAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
+            // var exists = await _context.Pets.AnyAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
 
-            if (!exists)
+            var existingPet = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id && (IsAdmin || p.VisitorId == VisitorId));
+            if (existingPet == null)
             {
                 return NotFound();
             }
+
+
+            // if (!exists)
+            //     {
+            //         return NotFound();
+            //     }
 
             // Tell the database to consider everything in pet to be _updated_ values. When
             // the save happens the database will _replace_ the values in the database with the ones from pet
@@ -257,7 +264,7 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
-            var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
+            var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (pet.VisitorId == VisitorId || pet.VisitorId == null));
 
             // If the pet doesn't exist: return a 404 Not Found.
             if (pet == null)
@@ -269,11 +276,13 @@ namespace TamagotchiAPI.Controllers
             var playtime = new Playtime();
             // Associate the playtime to the given pet.
             playtime.PetId = pet.Id;
+
             pet.HungerLevel += 3;
             pet.HappinessLevel += 5;
             pet.LastInteractedWithDate = DateTime.UtcNow;
 
             _context.Playtimes.Add(playtime);
+            _context.Entry(pet).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             // Return the new playtime to the response of the API
@@ -290,7 +299,7 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
-            var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
+            var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (pet.VisitorId == VisitorId || pet.VisitorId == null));
 
             if (pet == null)
             {
@@ -304,6 +313,7 @@ namespace TamagotchiAPI.Controllers
             pet.LastInteractedWithDate = DateTime.UtcNow;
 
             _context.Feedings.Add(feeding);
+            _context.Entry(pet).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return Ok(feeding);
@@ -319,7 +329,7 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
-            var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
+            var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (pet.VisitorId == VisitorId || pet.VisitorId == null));
 
             if (pet == null)
             {
@@ -332,6 +342,7 @@ namespace TamagotchiAPI.Controllers
             pet.LastInteractedWithDate = DateTime.UtcNow;
 
             _context.Scoldings.Add(scolding);
+            _context.Entry(pet).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return Ok(scolding);
