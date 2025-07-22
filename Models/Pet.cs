@@ -25,6 +25,11 @@ namespace TamagotchiAPI.Models
 
         public void IsDeadMethod()
         {
+            if (VisitorId == null)
+            {
+                IsDead = false;
+                return;
+            }
             if (IsDead)
             {
                 return;
