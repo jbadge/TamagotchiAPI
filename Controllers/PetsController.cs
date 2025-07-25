@@ -45,6 +45,16 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            if (!string.IsNullOrEmpty(VisitorId))
+            {
+                var visitorIdEscaped = VisitorId.Replace("'", "''");
+                var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{visitorIdEscaped}'";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+            }
+
+
             var allPets = await _context.Pets
                 .Include(pet => pet.Playtimes)
                 .Include(pet => pet.Feedings)
@@ -64,6 +74,8 @@ namespace TamagotchiAPI.Controllers
             //     }
 
             // return pets;
+
+            await transaction.CommitAsync();
 
             if (IsAdmin)
             {

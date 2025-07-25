@@ -1,3 +1,5 @@
+#nullable enable
+
 // VisitorIdMiddleware.cs
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
