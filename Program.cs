@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +14,23 @@ namespace TamagotchiAPI
         public static async Task Main(string[] args)
         {
 
-            var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+            var port = Environment.GetEnvironmentVariable("PORT") ?? "5001";
+
+            var URLs = new Dictionary<int, string>
+            {
+            // // Render
+            { 0, $"http://*:{Environment.GetEnvironmentVariable("PORT") ?? "5000"}" }, 
+            // // Local Network
+            { 1, "http://192.168.0.241:5000" }, 
+            // // Local Dev
+            { 2, "http://localhost:5001" }
+            };
+
+            var MODE = 0;
+            var selectedUrl = URLs[MODE];
 
             var host = Utilities.CreateWebHostBuilder(args)
-            // For Render
-            .UseUrls($"http://*:{port}")
-            // For local
-            // .UseUrls("http://*:5001")
+            .UseUrls(selectedUrl)
             .Build();
 
             using (var scope = host.Services.CreateScope())

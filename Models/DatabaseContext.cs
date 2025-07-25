@@ -58,6 +58,16 @@ namespace TamagotchiAPI.Models
             }
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Pet>(entity =>
+            {
+                entity.Property(e => e.VisitorId).HasColumnName("visitor_id");
+            });
+        }
+
         private string ConvertPostConnectionToConnectionString(string connection)
         {
             if (connection.Contains("pooler.supabase.com"))
