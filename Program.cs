@@ -42,6 +42,8 @@ namespace TamagotchiAPI
                 {
                     return;
                 }
+
+                await GlobalPetSeeder.SeedIfMissing(context);
             }
 
             Utilities.Notify("TamagotchiAPI Running!");

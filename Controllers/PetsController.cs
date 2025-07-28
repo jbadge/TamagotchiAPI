@@ -360,6 +360,13 @@ namespace TamagotchiAPI.Controllers
             return Ok(scolding);
         }
 
+        // Method to allow pinging to keep from winding down
+        [HttpGet("health")]
+        public IActionResult HealthCheck()
+        {
+            return Ok("OK");
+        }
+
         // Private helper method that looks up an existing pet by the supplied id
         private bool PetExists(int id)
         {
