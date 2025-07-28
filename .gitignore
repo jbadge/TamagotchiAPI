@@ -338,3 +338,6 @@ ASALocalRun/
 
 # Exclude dump.sql
 dump.sql
+
+# Local Netlify folder
+.netlify

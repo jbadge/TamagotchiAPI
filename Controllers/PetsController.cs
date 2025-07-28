@@ -109,7 +109,6 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
-            // var pet = await _context.Pets.FindAsync(id);
             var pet = await _context.Pets.
                 Where(pet => (IsAdmin || pet.VisitorId == VisitorId || pet.VisitorId == null) && pet.Id == id).
                 Include(pet => pet.Playtimes).
@@ -117,14 +116,11 @@ namespace TamagotchiAPI.Controllers
                 Include(pet => pet.Scoldings).
                 FirstOrDefaultAsync();
 
-            // If we didn't find anything, we receive a `null` in return
             if (pet == null)
             {
-                // Return a `404` response to the client indicating we could not find a pet with this id
                 return NotFound();
             }
 
-            // Return the pet as a JSON object.
             return pet;
         }
 
@@ -147,54 +143,36 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
-            // If the ID in the URL does not match the ID in the supplied request body, return a bad request
             if (id != pet.Id)
             {
                 return BadRequest();
             }
 
-            // var exists = await _context.Pets.AnyAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
-
             var existingPet = await _context.Pets.FirstOrDefaultAsync(p => p.Id == id && (IsAdmin || p.VisitorId == VisitorId));
+
             if (existingPet == null)
             {
                 return NotFound();
             }
 
-
-            // if (!exists)
-            //     {
-            //         return NotFound();
-            //     }
-
-            // Tell the database to consider everything in pet to be _updated_ values. When
-            // the save happens the database will _replace_ the values in the database with the ones from pet
             _context.Entry(pet).State = EntityState.Modified;
 
             try
             {
-                // Try to save these changes.
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                // Ooops, looks like there was an error, so check to see if the record we were
-                // updating no longer exists.
                 if (!PetExists(id))
                 {
-                    // If the record we tried to update was already deleted by someone else,
-                    // return a `404` not found
                     return NotFound();
                 }
                 else
                 {
-                    // Otherwise throw the error back, which will cause the request to fail
-                    // and generate an error to the client.
                     throw;
                 }
             }
 
-            // Return a copy of the updated data
             return Ok(pet);
         }
 
@@ -365,6 +343,15 @@ namespace TamagotchiAPI.Controllers
         public IActionResult HealthCheck()
         {
             return Ok("OK");
+        }
+
+        [HttpGet("whoami")]
+        public ActionResult GetVisitorInfo()
+        {
+            var visitorId = VisitorId ?? "";
+            var adminVisitorId = Environment.GetEnvironmentVariable("ADMIN_VISITOR_ID") ?? "";
+            var isAdmin = visitorId == adminVisitorId;
+            return Ok(new { visitorId, isAdmin });
         }
 
         // Private helper method that looks up an existing pet by the supplied id
