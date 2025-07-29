@@ -19,7 +19,7 @@ namespace TamagotchiAPI
             var URLs = new Dictionary<int, string>
             {
             // // Render
-            { 0, $"http://*:{Environment.GetEnvironmentVariable("PORT") ?? "5000"}" }, 
+            { 0, $"http://*:{Environment.GetEnvironmentVariable("PORT") ?? "5001"}" }, 
             // // Local Network
             { 1, "http://192.168.0.241:5000" }, 
             // // Local Dev

@@ -104,7 +104,6 @@ namespace TamagotchiAPI
                     {
                         var db = context.RequestServices.GetRequiredService<DatabaseContext>();
 
-
                         if (visitorId == adminVisitorId)
                         {
                             // Set admin role — no claim needed
@@ -119,22 +118,6 @@ namespace TamagotchiAPI
                             var escaped = visitorId.Replace("'", "''");
                             var sql = "set local request.jwt.claim.sub = '" + escaped + "'";
                             await db.Database.ExecuteSqlRawAsync(sql);
-                        }
-                        // Now query current_user and current_setting to log them:
-                        var conn = db.Database.GetDbConnection();
-                        await conn.OpenAsync();
-
-                        using (var cmd = conn.CreateCommand())
-                        {
-                            cmd.CommandText = "select current_user, current_setting('request.jwt.claim.sub', true)";
-                            using (var reader = await cmd.ExecuteReaderAsync())
-                            {
-                                if (await reader.ReadAsync())
-                                {
-                                    var currentUser = reader.GetString(0);
-                                    var jwtClaim = reader.IsDBNull(1) ? null : reader.GetString(1);
-                                }
-                            }
                         }
                     }
 
