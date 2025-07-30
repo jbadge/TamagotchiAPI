@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Npgsql;
 using TamagotchiAPI.Configuration;
 using TamagotchiAPI.Models;
 
@@ -102,7 +101,15 @@ namespace TamagotchiAPI
 
                     if (!string.IsNullOrEmpty(visitorId))
                     {
+                        // var db = context.RequestServices.GetRequiredService<DatabaseContext>();
+
                         var db = context.RequestServices.GetRequiredService<DatabaseContext>();
+
+                        // Make sure connection is open before setting role
+                        if (db.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
+                        {
+                            await db.Database.OpenConnectionAsync();
+                        }
 
                         if (visitorId == adminVisitorId)
                         {
@@ -122,6 +129,9 @@ namespace TamagotchiAPI
                     }
 
                     await next();
+
+                    // var db = context.RequestServices.GetRequiredService<DatabaseContext>();
+                    // await db.Database.CloseConnectionAsync();
                 });
 
             // Use routing to determine which endpoints are handled by which controllers and methods

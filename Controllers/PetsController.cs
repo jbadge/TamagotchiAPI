@@ -47,13 +47,12 @@ namespace TamagotchiAPI.Controllers
 
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            if (!string.IsNullOrEmpty(VisitorId))
+            if (!IsAdmin && !string.IsNullOrEmpty(VisitorId))
             {
                 var visitorIdEscaped = VisitorId.Replace("'", "''");
                 var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{visitorIdEscaped}'";
                 await _context.Database.ExecuteSqlRawAsync(sql);
             }
-
 
             var allPets = await _context.Pets
                 .Include(pet => pet.Playtimes)
