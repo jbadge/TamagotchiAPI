@@ -54,15 +54,6 @@ namespace TamagotchiAPI.Controllers
                 await _context.Database.ExecuteSqlRawAsync(sql);
             }
 
-            // ##### Optional: debug current role
-            using var cmd = _context.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = "SELECT current_role;";
-
-            if (_context.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
-                await _context.Database.OpenConnectionAsync();
-            var currentRole = await cmd.ExecuteScalarAsync();
-            Console.WriteLine($"[DEBUG in controller] current_role = {currentRole}");
-
             var allPets = await _context.Pets
                 .Include(pet => pet.Playtimes)
                 .Include(pet => pet.Feedings)
