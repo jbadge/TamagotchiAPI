@@ -187,20 +187,53 @@ namespace TamagotchiAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Pet>> PostPet(Pet pet)
         {
+            // if (string.IsNullOrEmpty(VisitorId) && !IsAdmin)
+            // {
+            //     return Unauthorized();
+            // }
+
+            // // Assign VisitorId from the request header or middleware
+            // pet.VisitorId = VisitorId;
+
+            // // Indicate to the database context we want to add this new record
+            // _context.Pets.Add(pet);
+            // await _context.SaveChangesAsync();
+
+            // // Return a response that indicates the object was created (status code `201`) and some additional
+            // // headers with details of the newly created object.
+            // return CreatedAtAction("GetPet", new { id = pet.Id }, pet);
             if (string.IsNullOrEmpty(VisitorId) && !IsAdmin)
             {
                 return Unauthorized();
             }
 
-            // Assign VisitorId from the request header or middleware
+            var conn = _context.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                await conn.OpenAsync();
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            if (!IsAdmin && !string.IsNullOrEmpty(VisitorId))
+            {
+                var visitorIdEscaped = VisitorId.Replace("'", "''");
+                await _context.Database.ExecuteSqlRawAsync("SET ROLE visitor_role");
+                var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{visitorIdEscaped}'";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+            }
+            else if (IsAdmin)
+            {
+                await _context.Database.ExecuteSqlRawAsync("SET ROLE admin_role");
+            }
+
             pet.VisitorId = VisitorId;
 
-            // Indicate to the database context we want to add this new record
             _context.Pets.Add(pet);
             await _context.SaveChangesAsync();
 
-            // Return a response that indicates the object was created (status code `201`) and some additional
-            // headers with details of the newly created object.
+            await transaction.CommitAsync();
+
             return CreatedAtAction("GetPet", new { id = pet.Id }, pet);
         }
 
