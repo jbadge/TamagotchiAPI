@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using TamagotchiAPI.Models;
 
 namespace TamagotchiAPI.Controllers
@@ -45,14 +47,27 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await SetVisitorContextAsync();
 
-            if (!IsAdmin && !string.IsNullOrEmpty(VisitorId))
-            {
-                var visitorIdEscaped = VisitorId.Replace("'", "''");
-                var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{visitorIdEscaped}'";
-                await _context.Database.ExecuteSqlRawAsync(sql);
-            }
+            // var conn = _context.Database.GetDbConnection();
+            // if (conn.State != System.Data.ConnectionState.Open)
+            // {
+            //     await conn.OpenAsync();
+            // }
+
+            // await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            // if (!IsAdmin && !string.IsNullOrEmpty(VisitorId))
+            // {
+            //     var visitorIdEscaped = VisitorId.Replace("'", "''");
+            //     var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{visitorIdEscaped}'";
+            //     await _context.Database.ExecuteSqlRawAsync(sql);
+            // }
+
+            // else if (IsAdmin)
+            // {
+            //     await _context.Database.ExecuteSqlRawAsync("SET ROLE admin_role");
+            // }
 
             var allPets = await _context.Pets
                 .Include(pet => pet.Playtimes)
@@ -108,6 +123,8 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
+            await using var transaction = await SetVisitorContextAsync();
+
             var pet = await _context.Pets.
                 Where(pet => (IsAdmin || pet.VisitorId == VisitorId || pet.VisitorId == null) && pet.Id == id).
                 Include(pet => pet.Playtimes).
@@ -119,6 +136,8 @@ namespace TamagotchiAPI.Controllers
             {
                 return NotFound();
             }
+
+            await transaction.CommitAsync();
 
             return pet;
         }
@@ -141,6 +160,8 @@ namespace TamagotchiAPI.Controllers
             {
                 return Unauthorized();
             }
+
+            await using var transaction = await SetVisitorContextAsync();
 
             if (id != pet.Id)
             {
@@ -171,6 +192,8 @@ namespace TamagotchiAPI.Controllers
                     throw;
                 }
             }
+
+            await transaction.CommitAsync();
 
             return Ok(pet);
         }
@@ -207,25 +230,8 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
-            var conn = _context.Database.GetDbConnection();
-            if (conn.State != System.Data.ConnectionState.Open)
-            {
-                await conn.OpenAsync();
-            }
+            await using var transaction = await SetVisitorContextAsync();
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-
-            if (!IsAdmin && !string.IsNullOrEmpty(VisitorId))
-            {
-                var visitorIdEscaped = VisitorId.Replace("'", "''");
-                await _context.Database.ExecuteSqlRawAsync("SET ROLE visitor_role");
-                var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{visitorIdEscaped}'";
-                await _context.Database.ExecuteSqlRawAsync(sql);
-            }
-            else if (IsAdmin)
-            {
-                await _context.Database.ExecuteSqlRawAsync("SET ROLE admin_role");
-            }
 
             pet.VisitorId = VisitorId;
 
@@ -251,6 +257,8 @@ namespace TamagotchiAPI.Controllers
                 return Unauthorized();
             }
 
+            await using var transaction = await SetVisitorContextAsync();
+
             // Find this pet by looking for the specific id
             var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
 
@@ -272,6 +280,8 @@ namespace TamagotchiAPI.Controllers
             // Tell the database to perform the deletion
             await _context.SaveChangesAsync();
 
+            await transaction.CommitAsync();
+
             // Return a copy of the deleted data
             return Ok(pet);
         }
@@ -285,6 +295,8 @@ namespace TamagotchiAPI.Controllers
             {
                 return Unauthorized();
             }
+
+            await using var transaction = await SetVisitorContextAsync();
 
             var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (pet.VisitorId == VisitorId || pet.VisitorId == null));
 
@@ -307,6 +319,8 @@ namespace TamagotchiAPI.Controllers
             _context.Entry(pet).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
+            await transaction.CommitAsync();
+
             // Return the new playtime to the response of the API
             return Ok(playtime);
         }
@@ -320,6 +334,8 @@ namespace TamagotchiAPI.Controllers
             {
                 return Unauthorized();
             }
+
+            await using var transaction = await SetVisitorContextAsync();
 
             var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (pet.VisitorId == VisitorId || pet.VisitorId == null));
 
@@ -338,6 +354,8 @@ namespace TamagotchiAPI.Controllers
             _context.Entry(pet).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
+            await transaction.CommitAsync();
+
             return Ok(feeding);
         }
 
@@ -350,6 +368,8 @@ namespace TamagotchiAPI.Controllers
             {
                 return Unauthorized();
             }
+
+            await using var transaction = await SetVisitorContextAsync();
 
             var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (pet.VisitorId == VisitorId || pet.VisitorId == null));
 
@@ -365,7 +385,10 @@ namespace TamagotchiAPI.Controllers
 
             _context.Scoldings.Add(scolding);
             _context.Entry(pet).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
 
             return Ok(scolding);
         }
@@ -377,13 +400,28 @@ namespace TamagotchiAPI.Controllers
             return Ok("OK");
         }
 
-        [HttpGet("whoami")]
-        public ActionResult GetVisitorInfo()
+        private async Task<IDbContextTransaction> SetVisitorContextAsync()
         {
-            var visitorId = VisitorId ?? "";
-            var adminVisitorId = Environment.GetEnvironmentVariable("ADMIN_VISITOR_ID") ?? "";
-            var isAdmin = visitorId == adminVisitorId;
-            return Ok(new { visitorId, isAdmin });
+            var conn = _context.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                await conn.OpenAsync();
+            }
+
+            var transaction = await _context.Database.BeginTransactionAsync();
+
+            if (!IsAdmin && !string.IsNullOrEmpty(VisitorId))
+            {
+                await _context.Database.ExecuteSqlRawAsync("SET ROLE visitor_role");
+                var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{VisitorId.Replace("'", "''")}'";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+            }
+            else if (IsAdmin)
+            {
+                await _context.Database.ExecuteSqlRawAsync("SET ROLE admin_role");
+            }
+
+            return transaction;
         }
 
         // Private helper method that looks up an existing pet by the supplied id

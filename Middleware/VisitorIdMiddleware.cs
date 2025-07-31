@@ -12,6 +12,14 @@ public class VisitorIdMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Skip middleware for Swagger routes
+        if (context.Request.Path.StartsWithSegments("/swagger"))
+        {
+            await _next(context);
+            return;
+        }
+
+        // Enforce visitor ID header
         if (!context.Request.Headers.ContainsKey("x-visitor-id") ||
             string.IsNullOrWhiteSpace(context.Request.Headers["x-visitor-id"]))
         {
