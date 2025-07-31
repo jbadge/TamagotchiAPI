@@ -99,6 +99,8 @@ namespace TamagotchiAPI
                     var visitorId = context.Request.Headers["x-visitor-id"].FirstOrDefault();
                     var adminVisitorId = Configuration["AdminVisitorId"];
 
+                    Console.WriteLine($"[Middleware] visitorId: {visitorId}, adminVisitorId: {adminVisitorId}");
+
                     if (!string.IsNullOrEmpty(visitorId))
                     {
                         // var db = context.RequestServices.GetRequiredService<DatabaseContext>();
