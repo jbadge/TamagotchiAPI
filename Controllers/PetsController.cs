@@ -6,6 +6,7 @@ using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using TamagotchiAPI.Models;
 
 namespace TamagotchiAPI.Controllers
@@ -19,18 +20,20 @@ namespace TamagotchiAPI.Controllers
     {
         // This is the variable you use to have access to your database
         private readonly DatabaseContext _context;
+        private readonly string _adminVisitorId;
 
         private string _visitorId;
         private bool? _isAdmin;
 
         private string VisitorId => _visitorId ??= Request.Headers["x-visitor-id"].FirstOrDefault();
-        private bool IsAdmin => _isAdmin ??= VisitorId == Environment.GetEnvironmentVariable("ADMIN_VISITOR_ID");
+        private bool IsAdmin => _isAdmin ??= VisitorId == _adminVisitorId;
 
         // Constructor that receives a reference to your database context
         // and stores it in _context for you to use in your API methods
-        public PetsController(DatabaseContext context)
+        public PetsController(DatabaseContext context, IConfiguration config)
         {
             _context = context;
+            _adminVisitorId = config["AdminVisitorId"];
         }
 
         // GET: api/Pets
@@ -49,31 +52,12 @@ namespace TamagotchiAPI.Controllers
 
             await using var transaction = await SetVisitorContextAsync();
 
-            // var conn = _context.Database.GetDbConnection();
-            // if (conn.State != System.Data.ConnectionState.Open)
-            // {
-            //     await conn.OpenAsync();
-            // }
-
-            // await using var transaction = await _context.Database.BeginTransactionAsync();
-
-            // if (!IsAdmin && !string.IsNullOrEmpty(VisitorId))
-            // {
-            //     var visitorIdEscaped = VisitorId.Replace("'", "''");
-            //     var sql = $"SET LOCAL \"request.jwt.claim.sub\" = '{visitorIdEscaped}'";
-            //     await _context.Database.ExecuteSqlRawAsync(sql);
-            // }
-
-            // else if (IsAdmin)
-            // {
-            //     await _context.Database.ExecuteSqlRawAsync("SET ROLE admin_role");
-            // }
-
             var allPets = await _context.Pets
-                .Include(pet => pet.Playtimes)
-                .Include(pet => pet.Feedings)
-                .Include(pet => pet.Scoldings)
-                .ToListAsync();
+            .Include(pet => pet.Playtimes)
+            .Include(pet => pet.Feedings)
+            .Include(pet => pet.Scoldings)
+            .Where(pet => IsAdmin || pet.VisitorId == VisitorId || pet.VisitorId == null)
+            .ToListAsync();
 
             foreach (var item in allPets)
             {
@@ -82,31 +66,23 @@ namespace TamagotchiAPI.Controllers
                     item.IsDeadMethod();
                 }
             }
-            // if (isDead)
-            //     {
-            //         pets = pets.Where(pets => pets.IsDead).ToList();
-            //     }
-
-            // return pets;
 
             await transaction.CommitAsync();
 
             if (IsAdmin)
             {
                 // Admin gets all pets
-                return allPets.
-                OrderBy(pets => pets.Id).
-                ToList();
+                return allPets
+                .OrderBy(pets => pets.Id)
+                .ToList();
             }
 
             // Uses the database context in `_context` to request all of the Pets, sort
             // them by row id and return them as a JSON array.
-            return allPets.
-            Where(pet => pet.VisitorId == VisitorId || pet.VisitorId == null).
-            OrderBy(row => row.Id).
-            ToList();
-            // Where(x => x.IsDead == isDead).
-            // Include(pet => pet.IsDead).
+            return allPets
+            .Where(pet => pet.VisitorId == VisitorId || pet.VisitorId == null)
+            .OrderBy(row => row.Id)
+            .ToList();
         }
 
         // GET: api/Pets/5
@@ -125,12 +101,12 @@ namespace TamagotchiAPI.Controllers
 
             await using var transaction = await SetVisitorContextAsync();
 
-            var pet = await _context.Pets.
-                Where(pet => (IsAdmin || pet.VisitorId == VisitorId || pet.VisitorId == null) && pet.Id == id).
-                Include(pet => pet.Playtimes).
-                Include(pet => pet.Feedings).
-                Include(pet => pet.Scoldings).
-                FirstOrDefaultAsync();
+            var pet = await _context.Pets
+                .Where(pet => (IsAdmin || pet.VisitorId == VisitorId || pet.VisitorId == null) && pet.Id == id)
+                .Include(pet => pet.Playtimes)
+                .Include(pet => pet.Feedings)
+                .Include(pet => pet.Scoldings)
+                .FirstOrDefaultAsync();
 
             if (pet == null)
             {
@@ -175,11 +151,15 @@ namespace TamagotchiAPI.Controllers
                 return NotFound();
             }
 
-            _context.Entry(pet).State = EntityState.Modified;
+            existingPet.Name = pet.Name;
+            existingPet.HungerLevel = pet.HungerLevel;
+            existingPet.HappinessLevel = pet.HappinessLevel;
+            existingPet.LastInteractedWithDate = pet.LastInteractedWithDate;
 
             try
             {
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -192,8 +172,6 @@ namespace TamagotchiAPI.Controllers
                     throw;
                 }
             }
-
-            await transaction.CommitAsync();
 
             return Ok(pet);
         }
@@ -210,21 +188,6 @@ namespace TamagotchiAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Pet>> PostPet(Pet pet)
         {
-            // if (string.IsNullOrEmpty(VisitorId) && !IsAdmin)
-            // {
-            //     return Unauthorized();
-            // }
-
-            // // Assign VisitorId from the request header or middleware
-            // pet.VisitorId = VisitorId;
-
-            // // Indicate to the database context we want to add this new record
-            // _context.Pets.Add(pet);
-            // await _context.SaveChangesAsync();
-
-            // // Return a response that indicates the object was created (status code `201`) and some additional
-            // // headers with details of the newly created object.
-            // return CreatedAtAction("GetPet", new { id = pet.Id }, pet);
             if (string.IsNullOrEmpty(VisitorId) && !IsAdmin)
             {
                 return Unauthorized();

@@ -99,12 +99,8 @@ namespace TamagotchiAPI
                     var visitorId = context.Request.Headers["x-visitor-id"].FirstOrDefault();
                     var adminVisitorId = Configuration["AdminVisitorId"];
 
-                    Console.WriteLine($"[Middleware] visitorId: {visitorId}, adminVisitorId: {adminVisitorId}");
-
                     if (!string.IsNullOrEmpty(visitorId))
                     {
-                        // var db = context.RequestServices.GetRequiredService<DatabaseContext>();
-
                         var db = context.RequestServices.GetRequiredService<DatabaseContext>();
 
                         // Make sure connection is open before setting role
@@ -131,9 +127,6 @@ namespace TamagotchiAPI
                     }
 
                     await next();
-
-                    // var db = context.RequestServices.GetRequiredService<DatabaseContext>();
-                    // await db.Database.CloseConnectionAsync();
                 });
 
             // Use routing to determine which endpoints are handled by which controllers and methods
