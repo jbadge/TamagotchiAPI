@@ -114,12 +114,12 @@ namespace TamagotchiAPI
                         if (visitorId == adminVisitorId)
                         {
                             // Set admin role — no claim needed
-                            await db.Database.ExecuteSqlRawAsync("set local role admin_role");
+                            await db.Database.ExecuteSqlRawAsync("set role admin_role");
                         }
                         else
                         {
                             // Set visitor role and claim
-                            await db.Database.ExecuteSqlRawAsync("set local role visitor_role");
+                            await db.Database.ExecuteSqlRawAsync("set role visitor_role");
 
                             // Escape single quotes in visitorId to avoid SQL injection
                             var escaped = visitorId.Replace("'", "''");
