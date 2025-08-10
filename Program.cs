@@ -13,9 +13,7 @@ namespace TamagotchiAPI
     {
         public static async Task Main(string[] args)
         {
-
             var port = Environment.GetEnvironmentVariable("PORT") ?? "5001";
-
             var URLs = new Dictionary<int, string>
             {
             // // Render

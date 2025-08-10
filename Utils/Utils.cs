@@ -11,7 +11,7 @@ namespace TamagotchiAPI.Utils
 {
     public class Utilities
     {
-        // Change this to true if you want to have your app browsable on the local network
+        // Change to true to have app browsable on local network
         private static bool ALLOW_APP_TO_BE_BROWSABLE_ON_THE_LOCAL_NETWORK = false;
 
         public static async Task<bool> WaitForMigrations(IWebHost host, DbContext context)
@@ -65,7 +65,6 @@ namespace TamagotchiAPI.Utils
         {
             try
             {
-                // Create a process to launch the `sdg toast` with our message
                 var newProcess = new Process()
                 {
                     StartInfo = new ProcessStartInfo
@@ -79,7 +78,6 @@ namespace TamagotchiAPI.Utils
                     }
                 };
 
-                // Start the message but do not wait for it to end, we don't care about the termination result.
                 newProcess.Start();
             }
             catch (System.ComponentModel.Win32Exception)

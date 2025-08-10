@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -11,14 +10,10 @@ using TamagotchiAPI.Models;
 
 namespace TamagotchiAPI.Controllers
 {
-    // All of these routes will be at the base URL:     /api/Pets
-    // That is what "api/[controller]" means below. It uses the name of the controller
-    // in this case PetsController to determine the URL
     [Route("api/[controller]")]
     [ApiController]
     public class PetsController : ControllerBase
     {
-        // This is the variable you use to have access to your database
         private readonly DatabaseContext _context;
         private readonly string _adminVisitorId;
 
@@ -28,8 +23,6 @@ namespace TamagotchiAPI.Controllers
         private string VisitorId => _visitorId ??= Request.Headers["x-visitor-id"].FirstOrDefault();
         private bool IsAdmin => _isAdmin ??= VisitorId == _adminVisitorId;
 
-        // Constructor that receives a reference to your database context
-        // and stores it in _context for you to use in your API methods
         public PetsController(DatabaseContext context, IConfiguration config)
         {
             _context = context;
@@ -37,9 +30,7 @@ namespace TamagotchiAPI.Controllers
         }
 
         // GET: api/Pets
-        //
-        // Returns a list of all your Pets
-        //
+        // Returns a list of all user's Pets
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pet>>> GetPets(
             bool isDead = false
@@ -77,8 +68,6 @@ namespace TamagotchiAPI.Controllers
                 .ToList();
             }
 
-            // Uses the database context in `_context` to request all of the Pets, sort
-            // them by row id and return them as a JSON array.
             return allPets
             .Where(pet => pet.VisitorId == VisitorId || pet.VisitorId == null)
             .OrderBy(row => row.Id)
@@ -86,11 +75,7 @@ namespace TamagotchiAPI.Controllers
         }
 
         // GET: api/Pets/5
-        //
-        // Fetches and returns a specific pet by finding it by id. The id is specified in the
-        // URL. In the sample URL above it is the `5`.  The "{id}" in the [HttpGet("{id}")] is what tells dotnet
-        // to grab the id from the URL. It is then made available to us as the `id` argument to the method.
-        //
+        // Fetches and returns a specific pet by finding it by id. 
         [HttpGet("{id}")]
         public async Task<ActionResult<Pet>> GetPet(int id)
         {
@@ -119,16 +104,7 @@ namespace TamagotchiAPI.Controllers
         }
 
         // PUT: api/Pets/5
-        //
-        // Update an individual pet with the requested id. The id is specified in the URL
-        // In the sample URL above it is the `5`. The "{id} in the [HttpPut("{id}")] is what tells dotnet
-        // to grab the id from the URL. It is then made available to us as the `id` argument to the method.
-        //
-        // In addition the `body` of the request is parsed and then made available to us as a Pet
-        // variable named pet. The controller matches the keys of the JSON object the client
-        // supplies to the names of the attributes of our Pet POCO class. This represents the
-        // new values for the record.
-        //
+        // Update an individual pet with the requested id. 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPet(int id, Pet pet)
         {
@@ -177,14 +153,7 @@ namespace TamagotchiAPI.Controllers
         }
 
         // POST: api/Pets
-        //
         // Creates a new pet in the database.
-        //
-        // The `body` of the request is parsed and then made available to us as a Pet
-        // variable named pet. The controller matches the keys of the JSON object the client
-        // supplies to the names of the attributes of our Pet POCO class. This represents the
-        // new values for the record.
-        //
         [HttpPost]
         public async Task<ActionResult<Pet>> PostPet(Pet pet)
         {
@@ -195,23 +164,17 @@ namespace TamagotchiAPI.Controllers
 
             await using var transaction = await SetVisitorContextAsync();
 
-
             pet.VisitorId = VisitorId;
 
             _context.Pets.Add(pet);
             await _context.SaveChangesAsync();
-
             await transaction.CommitAsync();
 
             return CreatedAtAction("GetPet", new { id = pet.Id }, pet);
         }
 
         // DELETE: api/Pets/5
-        //
-        // Deletes an individual pet with the requested id. The id is specified in the URL
-        // In the sample URL above it is the `5`. The "{id} in the [HttpDelete("{id}")] is what tells dotnet
-        // to grab the id from the URL. It is then made available to us as the `id` argument to the method.
-        //
+        // Deletes an individual pet with the requested id. 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePet(int id)
         {
@@ -222,12 +185,10 @@ namespace TamagotchiAPI.Controllers
 
             await using var transaction = await SetVisitorContextAsync();
 
-            // Find this pet by looking for the specific id
             var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
 
             if (pet == null)
             {
-                // There wasn't a pet with that id so return a `404` not found
                 return NotFound();
             }
 
@@ -237,15 +198,10 @@ namespace TamagotchiAPI.Controllers
                 return Forbid();
             }
 
-            // Tell the database we want to remove this record
             _context.Pets.Remove(pet);
-
-            // Tell the database to perform the deletion
             await _context.SaveChangesAsync();
-
             await transaction.CommitAsync();
 
-            // Return a copy of the deleted data
             return Ok(pet);
         }
 
@@ -263,15 +219,12 @@ namespace TamagotchiAPI.Controllers
 
             var pet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id && (pet.VisitorId == VisitorId || pet.VisitorId == null));
 
-            // If the pet doesn't exist: return a 404 Not Found.
             if (pet == null)
             {
-                // Return a '404' response to the client indicating we could not find a pet with this id
                 return NotFound();
             }
 
             var playtime = new Playtime();
-            // Associate the playtime to the given pet.
             playtime.PetId = pet.Id;
 
             pet.HungerLevel += 3;
@@ -281,10 +234,8 @@ namespace TamagotchiAPI.Controllers
             _context.Playtimes.Add(playtime);
             _context.Entry(pet).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-
             await transaction.CommitAsync();
 
-            // Return the new playtime to the response of the API
             return Ok(playtime);
         }
 
@@ -316,7 +267,6 @@ namespace TamagotchiAPI.Controllers
             _context.Feedings.Add(feeding);
             _context.Entry(pet).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-
             await transaction.CommitAsync();
 
             return Ok(feeding);
@@ -348,21 +298,20 @@ namespace TamagotchiAPI.Controllers
 
             _context.Scoldings.Add(scolding);
             _context.Entry(pet).State = EntityState.Modified;
-
             await _context.SaveChangesAsync();
-
             await transaction.CommitAsync();
 
             return Ok(scolding);
         }
 
-        // Method to allow pinging to keep from winding down
+        // Method to allow pinging to keep from spinning down
         [HttpGet("health")]
         public IActionResult HealthCheck()
         {
             return Ok("OK");
         }
 
+        // Helper function that sets role to visitor or admin
         private async Task<IDbContextTransaction> SetVisitorContextAsync()
         {
             var conn = _context.Database.GetDbConnection();
@@ -387,7 +336,7 @@ namespace TamagotchiAPI.Controllers
             return transaction;
         }
 
-        // Private helper method that looks up an existing pet by the supplied id
+        // Helper function to look up an existing pet by the supplied id
         private bool PetExists(int id)
         {
             return _context.Pets.Any(pet => pet.Id == id && (IsAdmin || pet.VisitorId == VisitorId));
